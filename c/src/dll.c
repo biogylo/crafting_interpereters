@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include "dll.h"
+#include <stdio.h>
 
 dll_head_t* create_dll() {
     dll_head_t* head = (dll_head_t*) malloc(sizeof(dll_head_t));
@@ -11,12 +12,14 @@ dll_head_t* create_dll() {
 }
 
 void destroy_dll_node(dll_node_t* node) {
+    printf("Destroying node with contents \"%s\"\n", node->contents);
     free(node->contents);
     free(node);
     return;
 }
 
 void destroy_dll(dll_head_t* head) {
+    printf("Destroying linked list\n");
     dll_node_t* to_destroy = head->first;
     while (to_destroy != NULL) {
         dll_node_t* next = to_destroy->next;
@@ -28,11 +31,12 @@ void destroy_dll(dll_head_t* head) {
 
 dll_node_t* node_from_str(const char* source) {
     size_t length = strlen(source);
-    char* copy = (char*) malloc(length);
+    char* copy = (char*) malloc(length+1);
+    copy[length] = 0;
     dll_node_t* node = (dll_node_t*) malloc(sizeof(dll_node_t));
     node->prev = NULL;
     node->next = NULL;
-    node->contents = strncpy(copy, source, length);
+    node->contents = strncpy(copy, source, length+1);
     return node;
 }
 
@@ -95,6 +99,42 @@ dll_node_t* find_in_dll(dll_head_t* head, const char* target) {
     return NULL;
 }
 
+void pop_dll_node(dll_node_t* node) {
+    if (node == NULL) {
+        return;
+    }
+    if (node->prev != NULL) {
+        node->prev->next = node->next;
+        if (node->next != NULL) {
+            node->next->prev = node->prev;
+        }
+    }
+}
+
+dll_node_t* pop_from_dll(dll_head_t* head, size_t index) {
+    dll_node_t* node = get_from_dll(head, index);
+    if (node != NULL) {
+        head->first = node->next;
+    }
+    node->next = NULL;
+    return node;
+}
+
+dll_node_t* pop_first_from_dll(dll_head_t* head) {
+    dll_node_t* node = head->first;
+    if (node == NULL) {
+        return NULL;
+    }
+    head->first = node->next;
+    return node;
+}
+
+dll_node_t* pop_last_from_dll(dll_head_t* head) {
+    dll_node_t* node = get_last_dll(head);
+    pop_dll_node(node);
+    return node;
+}
+
 size_t dll_length(dll_head_t* head) {
     dll_node_t* node = head->first;
     size_t i = 0;
@@ -102,4 +142,15 @@ size_t dll_length(dll_head_t* head) {
         node = node->next;
     }
     return i;
+}
+
+void dll_display(dll_head_t* head) {
+    printf("Linked List: head");
+    dll_node_t* node = head->first;
+    while (node != NULL){
+        printf(" -> \"%s\"", node->contents);
+        node = node->next;
+    }
+    printf("\n");
+    return;
 }

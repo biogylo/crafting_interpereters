@@ -23,7 +23,11 @@ dll_node_t* get_last_dll(dll_head_t* head);
 dll_node_t* get_from_dll(dll_head_t* head, size_t index);
 dll_node_t* find_in_dll(dll_head_t* head, const char* target);
 
-
+dll_node_t* pop_last_from_dll(dll_head_t* head);
+dll_node_t* pop_first_from_dll(dll_head_t* head);
+dll_node_t* pop_from_dll(dll_head_t* head, size_t index);
+void pop_dll_node(dll_node_t* node);
 
 void destroy_dll_node(dll_node_t* node);
 dll_node_t* node_from_str(const char* source);
+void dll_display(dll_head_t* head);
