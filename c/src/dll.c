@@ -5,9 +5,10 @@
 #include "dll.h"
 #include <stdio.h>
 
-dll_head_t* create_dll() {
-    dll_head_t* head = (dll_head_t*) malloc(sizeof(dll_head_t));
-    head->first = NULL;
+dll_node_t* create_dll() {
+    dll_node_t* head = (dll_node_t*) malloc(sizeof(dll_node_t));
+    head->prev = NULL;
+    head->next = NULL;
     return head;
 }
 
@@ -18,9 +19,9 @@ void destroy_dll_node(dll_node_t* node) {
     return;
 }
 
-void destroy_dll(dll_head_t* head) {
+void destroy_dll(dll_node_t* head) {
     printf("Destroying linked list\n");
-    dll_node_t* to_destroy = head->first;
+    dll_node_t* to_destroy = head->next;
     while (to_destroy != NULL) {
         dll_node_t* next = to_destroy->next;
         destroy_dll_node(to_destroy);
@@ -40,24 +41,24 @@ dll_node_t* node_from_str(const char* source) {
     return node;
 }
 
-void insert_first_dll(dll_head_t* head, const char* source) {
+void insert_first_dll(dll_node_t* head, const char* source) {
     dll_node_t* new = node_from_str(source);
-    if (head->first == NULL) {
-        head->first = new;
+    if (head->next == NULL) {
+        head->next = new;
         return;
     }
-    dll_node_t* old = head->first;
-    head->first = new;
+    dll_node_t* old = head->next;
+    head->next = new;
     new->next = old;
     old->prev = new;
     return;
 }
 
 
-void insert_last_dll(dll_head_t* head, const char* source) {
+void insert_last_dll(dll_node_t* head, const char* source) {
     dll_node_t* new = node_from_str(source);
-    if (head->first == NULL) {
-        head->first = new;
+    if (head->next == NULL) {
+        head->next = new;
         return;
     }
     dll_node_t* last = get_last_dll(head);
@@ -65,8 +66,8 @@ void insert_last_dll(dll_head_t* head, const char* source) {
     last->next = new;
 }
 
-dll_node_t* get_last_dll(dll_head_t* head) {
-    dll_node_t* node = head->first;
+dll_node_t* get_last_dll(dll_node_t* head) {
+    dll_node_t* node = head->next;
     if (node == NULL) {
         return NULL;
     }
@@ -79,16 +80,16 @@ dll_node_t* get_last_dll(dll_head_t* head) {
     assert(0 && "This is unreachable, because of the dll's invariants");
 }
 
-dll_node_t* get_from_dll(dll_head_t* head, size_t index) {
-    dll_node_t* node = head->first;
+dll_node_t* get_from_dll(dll_node_t* head, size_t index) {
+    dll_node_t* node = head->next;
     for (size_t i = 0; node != NULL && i < index; i++){
         node = node->next;
     }
     return node;
 }
 
-dll_node_t* find_in_dll(dll_head_t* head, const char* target) {
-    dll_node_t* node = head->first;
+dll_node_t* find_in_dll(dll_node_t* head, const char* target) {
+    dll_node_t* node = head->next;
     while(node != NULL){
         if (strcmp(target, node->contents) != 0) {
             node = node->next;
@@ -111,32 +112,33 @@ void pop_dll_node(dll_node_t* node) {
     }
 }
 
-dll_node_t* pop_from_dll(dll_head_t* head, size_t index) {
+dll_node_t* pop_from_dll(dll_node_t* head, size_t index) {
     dll_node_t* node = get_from_dll(head, index);
     if (node != NULL) {
-        head->first = node->next;
+        head->next = node->next;
     }
     node->next = NULL;
     return node;
 }
 
-dll_node_t* pop_first_from_dll(dll_head_t* head) {
-    dll_node_t* node = head->first;
+dll_node_t* pop_first_from_dll(dll_node_t* head) {
+    dll_node_t* node = head->next;
     if (node == NULL) {
         return NULL;
     }
-    head->first = node->next;
+    head->next = node->next;
     return node;
 }
 
-dll_node_t* pop_last_from_dll(dll_head_t* head) {
+dll_node_t* pop_last_from_dll(dll_node_t* head) {
     dll_node_t* node = get_last_dll(head);
     pop_dll_node(node);
     return node;
 }
 
-size_t dll_length(dll_head_t* head) {
-    dll_node_t* node = head->first;
+size_t dll_length(dll_node_t* head) {
+    assert(head->prev == NULL && "This has to be a head");
+    dll_node_t* node = head->next;
     size_t i = 0;
     for (; node != NULL; i++ ){
         node = node->next;
@@ -144,9 +146,10 @@ size_t dll_length(dll_head_t* head) {
     return i;
 }
 
-void dll_display(dll_head_t* head) {
+void dll_display(dll_node_t* head) {
     printf("Linked List: head");
-    dll_node_t* node = head->first;
+    assert(head->prev == NULL && "This has to be a head");
+    dll_node_t* node = head->next;
     while (node != NULL){
         printf(" -> \"%s\"", node->contents);
         node = node->next;

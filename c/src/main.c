@@ -23,7 +23,7 @@ size_t test_dll(){
     const static char* c = "third";
     const static char* d = "fourth";
 
-    dll_head_t* head = create_dll();
+    dll_node_t* head = create_dll();
     ASSERT(dll_length(head) == 0);
     dll_display(head);
 
@@ -59,7 +59,7 @@ size_t test_dll(){
     ASSERT(dll_length(head) == 4);
     dll_display(head);
     printf("Popping first!\n");
-    
+
     dll_node_t* first = pop_first_from_dll(head);
     dll_display(head);
     ASSERT_STREQ(first->contents, d);
